@@ -1,4 +1,5 @@
 /*
+
 val vec = Vector(1,2,3)
 println(vec(1))
 
@@ -49,8 +50,12 @@ println(dao)
 val out = dao.filter((_.name == "john"))
 println(out)
 
+out match {
+    case Nil => println("no item found")
+    case item::_ => println("found item with", item)
+}
+
 
 val t = dao ++ List(Item("scala", 2))
-println(t)]
-
+println(t)
 */

@@ -30,14 +30,22 @@ object WebServer {
     // (fake) async database query api
     def fetchItem(itemId: Long): Future[Option[Item]] = {
         val out = dao.filter(_.id == itemId)
-        // return Option(out)
-        return Future { Option(out(0)) }
+        
+        // Check if the list is empty
+        out match {
+            // Empty list
+            case Nil => return Future{ Option(null) }
+            // Take the head and ignore the tail
+            case item::_ => return Future{ Option(item) }
+        }
     }
 
     def saveOrder(order: Order): Future[Done] = {
         dao = dao ++ order.items
         // return Success()
-        return Future { Done }
+        return Future {
+            Done
+        }
     }
 
     def main(args: Array[String]) {
@@ -47,7 +55,7 @@ object WebServer {
 
         val route: Route =
             get {
-                pathPrefix("item" / LongNumber) { id =>
+                pathPrefix("items" / LongNumber) { id =>
                     // There might be no item for a given id
                     val maybeItem: Future[Option[Item]] = fetchItem(id)
 
@@ -58,13 +66,27 @@ object WebServer {
                 } 
             } ~
             post {
-                path("create-order") {
+                path("items") {
                     entity(as[Order]) { order =>
                         val saved: Future[Done] = saveOrder(order)
                         onComplete(saved) { done =>
                             complete("order created")
                         }
                     }
+                }
+            } ~
+            put {
+                pathPrefix ("items" / IntNumber ) { orderId =>
+                    entity(as[Item]) { item =>
+                        complete(StatusCodes.OK, "Completed")
+                    }
+                }
+            } ~ 
+            delete {
+                pathPrefix ("items" / IntNumber ) { orderId =>
+                    println("Calling delete endpoint with orderId = " + orderId)
+                    complete(StatusCodes.OK, "Completed")
+                
                 }
             }
 
