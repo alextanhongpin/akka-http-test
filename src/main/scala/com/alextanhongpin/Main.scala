@@ -13,6 +13,7 @@ import akka.stream.ActorMaterializer
 
 import scala.io.StdIn
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Success}
 
 object WebServer {
@@ -30,11 +31,13 @@ object WebServer {
     def fetchItem(itemId: Long): Future[Option[Item]] = {
         val out = dao.filter(_.id == itemId)
         // return Option(out)
+        return Future { Option(out(0)) }
     }
 
     def saveOrder(order: Order): Future[Done] = {
         dao = dao ++ order.items
         // return Success()
+        return Future { Done }
     }
 
     def main(args: Array[String]) {
